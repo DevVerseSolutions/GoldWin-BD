@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GoldWin BD</title>
+    
+    <!-- Suppress Tailwind Play CDN Production Warning -->
+    <script>
+        (function() {
+            const originalWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                    return;
+                }
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -29,6 +42,16 @@
         input, select { background: #f9fafb !important; color: #333 !important; border: 1px solid #e5e7eb !important; outline: none; transition: box-shadow 0.3s, border-color 0.3s; }
         input:focus, select:focus { border-color: #D4AF37 !important; box-shadow: 0 0 10px rgba(212,175,55,0.2) !important; }
         input[readonly] { user-select: none; }
+
+        /* Remove default number input spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
         
         /* Elevated Cards for Professional Floating Look */
         .premium-card { background-color: #fff; border: 1px solid #f3f4f6; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease; }
@@ -120,17 +143,18 @@
 
 <div id="app" class="relative min-h-screen pb-20">
 
-    <div id="csFloatBtn" onclick="openCsChat()"><i class="fas fa-headset text-2xl"></i></div>
+    <!-- Floating CS button (Hidden by default on auth screen to avoid overlap) -->
+    <div id="csFloatBtn" class="hidden-el" onclick="openCsChat()"><i class="fas fa-headset text-2xl"></i></div>
 
     <!-- AUTH PAGE -->
-    <div id="authPage" class="fixed inset-0 z-[2000] bg-[#f9fafb] overflow-y-auto hidden-el">
+    <div id="authPage" class="fixed inset-0 z-[2000] bg-[#f9fafb] overflow-y-auto max-w-[480px] mx-auto hidden-el">
         <div class="bg-gradient-to-r from-[#F3C326] to-[#D4AF37] text-white px-4 pt-4 pb-16 rounded-b-[2.5rem] shadow-[0_10px_30px_rgba(212,175,55,0.3)] relative z-10">
             <div class="flex justify-between items-center mb-4">
-                <i class="fas fa-angle-left text-2xl cursor-pointer hover:scale-110 transition"></i>
+                <i class="fas fa-angle-left text-2xl cursor-pointer hover:scale-110 transition" onclick="toggleAuth(authMode === 'login' ? 'reg' : 'login')"></i>
                 <div class="flex items-center gap-4">
                     <i class="fas fa-headset text-xl cursor-pointer hover:scale-110 transition" onclick="openCsChat()"></i>
                     <div class="flex items-center gap-1 text-sm font-bold px-2 py-1 bg-white/20 rounded shadow-inner">
-                        <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" class="w-5 h-3 shadow-sm"> EN
+                        <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" class="w-5 h-3 shadow-sm" alt="EN"> EN
                     </div>
                 </div>
             </div>
@@ -145,9 +169,9 @@
             </div>
         </div>
 
-        <div class="bg-white -mt-8 mx-0 px-6 pt-10 pb-10 min-h-[70vh] rounded-t-[2.5rem] relative z-20 shadow-[-5px_-10px_25px_rgba(0,0,0,0.05)]">
+        <div class="bg-white -mt-8 mx-0 px-6 pt-10 pb-12 min-h-[70vh] rounded-t-[2.5rem] relative z-20 shadow-[-5px_-10px_25px_rgba(0,0,0,0.05)]">
             <div class="flex justify-center mb-6 border-b border-gray-100">
-                <button id="regTab" class="pb-3 text-[#F3C326] font-bold text-base border-b-2 border-[#F3C326] flex flex-col items-center gap-1 w-1/2">
+                <button id="regTab" class="pb-3 text-[#F3C326] font-bold text-base border-b-2 border-[#F3C326] flex flex-col items-center gap-1 w-full max-w-xs">
                     <i class="fas fa-mobile-alt text-xl"></i> <span id="regTabText">Register your phone</span>
                 </button>
             </div>
@@ -155,18 +179,18 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-sm text-gray-700 font-bold flex items-center gap-2 mb-2"><i class="fas fa-mobile-alt text-[#F3C326]"></i> Phone number</label>
-                    <div class="flex gap-2">
-                        <div class="bg-gray-50 border border-gray-200 text-gray-600 font-bold p-3.5 rounded-xl flex items-center justify-center w-28 shadow-sm">
-                            +880 <i class="fas fa-angle-down ml-2 text-gray-400"></i>
+                    <div class="flex gap-2 w-full">
+                        <div class="bg-gray-50 border border-gray-200 text-gray-600 font-bold p-3.5 rounded-xl flex items-center justify-center w-24 flex-shrink-0 shadow-sm text-sm">
+                            +880 <i class="fas fa-angle-down ml-1 text-gray-400 text-xs"></i>
                         </div>
-                        <input type="number" id="authPhone" class="flex-1 p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm transition focus:ring-2 focus:ring-[#F3C326]/40" placeholder="Please enter the phone number">
+                        <input type="number" id="authPhone" class="flex-1 min-w-0 w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm transition focus:ring-2 focus:ring-[#F3C326]/40 text-sm" placeholder="Please enter phone number">
                     </div>
                 </div>
                 
                 <div>
                     <label class="text-sm text-gray-700 font-bold flex items-center gap-2 mb-2" id="passLabel"><i class="fas fa-lock text-[#F3C326]"></i> Set password</label>
                     <div class="relative">
-                        <input type="password" id="authPass" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm pr-12 transition focus:ring-2 focus:ring-[#F3C326]/40" placeholder="Set password">
+                        <input type="password" id="authPass" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm pr-12 transition focus:ring-2 focus:ring-[#F3C326]/40 text-sm" placeholder="Set password">
                         <i class="far fa-eye-slash absolute right-4 top-4 text-gray-400 text-lg cursor-pointer hover:text-gray-600 transition" onclick="togglePasswordVisibility('authPass', this)"></i>
                     </div>
                 </div>
@@ -174,15 +198,15 @@
                 <div id="confirmPassBox">
                     <label class="text-sm text-gray-700 font-bold flex items-center gap-2 mb-2"><i class="fas fa-lock text-[#F3C326]"></i> Confirm password</label>
                     <div class="relative">
-                        <input type="password" id="authConfirmPass" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm pr-12 transition focus:ring-2 focus:ring-[#F3C326]/40" placeholder="Confirm password">
+                        <input type="password" id="authConfirmPass" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm pr-12 transition focus:ring-2 focus:ring-[#F3C326]/40 text-sm" placeholder="Confirm password">
                         <i class="far fa-eye-slash absolute right-4 top-4 text-gray-400 text-lg cursor-pointer hover:text-gray-600 transition" onclick="togglePasswordVisibility('authConfirmPass', this)"></i>
                     </div>
                 </div>
 
                 <div id="inviteCodeBox">
-                    <label class="text-sm text-gray-700 font-bold flex items-center gap-2 mb-2"><i class="fas fa-envelope-open-text text-[#F3C326]"></i>  code</label>
+                    <label class="text-sm text-gray-700 font-bold flex items-center gap-2 mb-2"><i class="fas fa-envelope-open-text text-[#F3C326]"></i> Referral code (Optional)</label>
                     <div class="relative">
-                        <input type="text" id="authCode" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm transition focus:ring-2 focus:ring-[#F3C326]/40" placeholder="Referral Code (Optional)">
+                        <input type="text" id="authCode" class="w-full p-3.5 rounded-xl font-bold placeholder-gray-400 bg-gray-50 border border-gray-200 shadow-sm transition focus:ring-2 focus:ring-[#F3C326]/40 text-sm" placeholder="Referral Code (Optional)">
                     </div>
                 </div>
                 
@@ -221,7 +245,7 @@
                 
                 <!-- SINGLE BANNER (Perfectly Fitted & Fallback Image setup) -->
                 <div class="w-full h-40 rounded-2xl bg-gray-900 shadow-xl mb-4 relative overflow-hidden border border-[#D4AF37]/30 premium-card">
-                    <img id="homeSingleBanner" src="https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=800&q=80" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-16061676684-78701c57f13d?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover object-center transition-opacity duration-300">
+                    <img id="homeSingleBanner" src="https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=800&q=80" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-16061676684-78701c57f13d?auto=format&fit=crop&w=800&q=80';" class="w-full h-full object-cover object-center transition-opacity duration-300" alt="Banner">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
                 </div>
 
@@ -412,7 +436,7 @@
             
             <div class="px-4 pb-24">
                 <div class="w-full h-44 premium-card border-0 casino-dark-gradient rounded-2xl mb-5 relative overflow-hidden flex items-center justify-center shadow-[0_10px_25px_rgba(0,0,0,0.15)]">
-                    <img src="https://i.imgur.com/vH9Z3lO.png" class="absolute w-full h-full object-cover opacity-30 mix-blend-overlay">
+                    <img src="https://i.imgur.com/vH9Z3lO.png" class="absolute w-full h-full object-cover opacity-30 mix-blend-overlay" alt="Gift">
                     <div class="relative z-10 text-center"><i class="fas fa-gift text-6xl text-[#D4AF37] mb-2 drop-shadow-[0_0_20px_rgba(212,175,55,0.7)] hover:scale-110 transition-transform"></i><h3 class="text-white font-black tracking-widest uppercase mt-2 drop-shadow-sm">Redeem Reward</h3></div>
                 </div>
 
@@ -448,14 +472,14 @@
                 <div class="flex gap-3 mb-6 overflow-x-auto pb-4 pt-1 px-1" style="scrollbar-width: none;">
                     <div onclick="selectTopMethod('Nagad')" id="top-m-Nagad" class="min-w-[110px] h-[95px] premium-card p-2 flex flex-col items-center justify-between cursor-pointer transition hover:border-[#D4AF37]">
                         <div class="flex-1 w-full flex items-center justify-center">
-                            <img id="logo-Nagad-img" src="" class="max-w-full max-h-[48px] object-contain hidden">
+                            <img id="logo-Nagad-img" src="" class="max-w-full max-h-[48px] object-contain hidden" alt="Nagad">
                             <svg id="logo-Nagad-svg" class="w-10 h-10 drop-shadow-sm" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="15" fill="#ED1C24"/><path d="M50 20 A30 30 0 1 1 20 50" fill="none" stroke="#F7931E" stroke-width="12" stroke-linecap="round"/><path d="M50 35 A15 15 0 1 1 35 50" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="50" r="5" fill="#F7931E"/></svg>
                         </div>
                         <span class="text-[11px] font-black text-gray-700 uppercase tracking-wider mt-1">Nagad</span>
                     </div>
                     <div onclick="selectTopMethod('Bkash')" id="top-m-Bkash" class="min-w-[110px] h-[95px] premium-card p-2 flex flex-col items-center justify-between cursor-pointer top-method-active transition hover:border-[#D4AF37]">
                         <div class="flex-1 w-full flex items-center justify-center">
-                            <img id="logo-Bkash-img" src="" class="max-w-full max-h-[48px] object-contain hidden">
+                            <img id="logo-Bkash-img" src="" class="max-w-full max-h-[48px] object-contain hidden" alt="bKash">
                             <svg id="logo-Bkash-svg" class="w-10 h-10 drop-shadow-sm" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="15" fill="#E2136E"/><polygon points="25,35 50,55 25,75" fill="#FFFFFF"/><polygon points="50,55 75,35 100,55 75,75" fill="#FFFFFF"/></svg>
                         </div>
                         <span class="text-[11px] font-black text-gray-700 uppercase tracking-wider mt-1">bKash</span>
@@ -511,7 +535,7 @@
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 pointer-events-none"></div>
                 <div class="flex items-center gap-5 relative z-10 pt-4">
                     <div onclick="openAvatarModal()" class="relative cursor-pointer group">
-                        <img id="profileAvatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-24 h-24 rounded-full border-4 border-[#D4AF37] object-cover bg-gray-800 shadow-[0_0_20px_rgba(212,175,55,0.6)] transition-transform group-hover:scale-105">
+                        <img id="profileAvatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-24 h-24 rounded-full border-4 border-[#D4AF37] object-cover bg-gray-800 shadow-[0_0_20px_rgba(212,175,55,0.6)] transition-transform group-hover:scale-105" alt="Avatar">
                         <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm"><i class="fas fa-camera text-white text-xl"></i></div>
                     </div>
                     <div>
@@ -595,7 +619,7 @@
         <div class="casino-dark-gradient p-3 flex justify-between items-center sticky top-0 z-30 shadow-[0_10px_20px_rgba(0,0,0,0.3)] border-b border-gray-800 text-white">
             <div class="flex items-center gap-2">
                 <i onclick="closeGame()" class="fas fa-chevron-left p-2 cursor-pointer text-[#D4AF37] text-lg hover:scale-110 transition"></i>
-                <h2 class="font-black italic text-xl drop-shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-[#FFDF00] to-[#D4AF37]">GoldWin BD</h2>
+                <h2 class="font-black italic text-xl drop-shadow-sm text-transparent bg-clip-text bg-gradient-r from-[#FFDF00] to-[#D4AF37]">GoldWin BD</h2>
             </div>
             <div class="flex gap-4 items-center pr-2 text-xl text-[#D4AF37]">
                 <i class="fas fa-headset cursor-pointer hover:text-white transition hover:scale-110" onclick="openCsChat()"></i>
@@ -941,22 +965,24 @@
 
 <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyBtMzF08LPujf9ja1pgfhARfUvlCvoTfoA",
-  authDomain: "goldwin-bd.firebaseapp.com",
-  databaseURL: "https://goldwin-bd-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "goldwin-bd",
-  storageBucket: "goldwin-bd.firebasestorage.app",
-  messagingSenderId: "359601082785",
-  appId: "1:359601082785:web:42042c8cf55380e1a83be0",
-  measurementId: "G-ERWF2BJEY0"
-};
+      apiKey: "AIzaSyBtMzF08LPujf9ja1pgfhARfUvlCvoTfoA",
+      authDomain: "goldwin-bd.firebaseapp.com",
+      databaseURL: "https://goldwin-bd-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "goldwin-bd",
+      storageBucket: "goldwin-bd.firebasestorage.app",
+      messagingSenderId: "359601082785",
+      appId: "1:359601082785:web:42042c8cf55380e1a83be0",
+      measurementId: "G-ERWF2BJEY0"
+    };
     
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    const storage = firebase.storage(); // Initialized Storage for CS image upload
+    const storage = firebase.storage();
 
     let user = null; 
     let authMode = 'reg'; 
+    let currentBet = null;
+    let currentWalletTab = 'deposit';
     let gameTimerInterval = null; 
     let allUsersDataCache = {}; 
     let liveWinnerInterval = null;
@@ -1038,6 +1064,7 @@
                     
                     document.getElementById('authPage').classList.add('hidden-el');
                     document.getElementById('mainContent').classList.remove('hidden-el');
+                    document.getElementById('csFloatBtn').classList.remove('hidden-el'); // Show float button when logged in
                     
                     setupListeners(saved); 
                     initTimer(); 
@@ -1047,10 +1074,12 @@
                     updateChannelList('Bkash'); 
                 } else {
                     document.getElementById('authPage').classList.remove('hidden-el');
+                    document.getElementById('csFloatBtn').classList.add('hidden-el');
                 }
             });
         } else {
             document.getElementById('authPage').classList.remove('hidden-el');
+            document.getElementById('csFloatBtn').classList.add('hidden-el');
         }
         
         database.ref('admin_control').on('value', s => { 
@@ -1079,7 +1108,6 @@
             if(s.exists()) { 
                 const settings = s.val();
                 
-                // SINGLE BANNER LOGIC (Fixed perfect fitting with fallback)
                 let bannerURL = "https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&w=800&q=80";
                 if (settings.home_banner && typeof settings.home_banner === 'string' && settings.home_banner.trim() !== "") {
                     bannerURL = settings.home_banner.trim();
@@ -1159,19 +1187,25 @@
             document.getElementById('regTabText').innerText = 'Register your phone';
         }
         document.getElementById('authBtn').innerText = isLogin ? 'LOG IN' : 'Register';
-        document.getElementById('authSwitchBtn').innerText = isLogin ? 'r a new account' : 'Login to existing account';
+        document.getElementById('authSwitchBtn').innerText = isLogin ? 'Register a new account' : 'Login to existing account';
     }
 
     function handleAuth() {
-        const p = document.getElementById('authPhone').value; const pass = document.getElementById('authPass').value; 
+        const p = document.getElementById('authPhone').value.trim(); 
+        const pass = document.getElementById('authPass').value; 
         if(!p || !pass) return alert("Please fill all fields!");
         if(authMode === 'login') {
             database.ref('users/' + p).once('value', s => { 
-                if(s.exists() && s.val().pass === pass) { localStorage.setItem('bd99_user', p); location.reload(); } 
-                else { alert("Invalid Login Credentials!"); }
+                if(s.exists() && s.val().pass === pass) { 
+                    localStorage.setItem('bd99_user', p); 
+                    location.reload(); 
+                } else { 
+                    alert("Invalid Login Credentials!"); 
+                }
             });
         } else {
-            const cPass = document.getElementById('authConfirmPass').value; const ref = document.getElementById('authCode').value; 
+            const cPass = document.getElementById('authConfirmPass').value; 
+            const ref = document.getElementById('authCode').value.trim(); 
             if(pass !== cPass) return alert("Passwords do not match!");
             
             database.ref('users/' + p).once('value', s => {
@@ -1204,9 +1238,22 @@
                     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}` 
                 };
                 
-                if(ref) { database.ref('users').orderByChild('uid').equalTo(parseInt(ref)).once('value', rs => { if(rs.exists()) { rs.forEach(c => { let rKey = c.key; let cnt = c.val().referrals.count || 0; database.ref(`users/${rKey}/referrals/count`).set(cnt + 1); }); } }); }
+                if(ref) { 
+                    database.ref('users').orderByChild('uid').equalTo(parseInt(ref)).once('value', rs => { 
+                        if(rs.exists()) { 
+                            rs.forEach(c => { 
+                                let rKey = c.key; 
+                                let cnt = c.val().referrals ? (c.val().referrals.count || 0) : 0; 
+                                database.ref(`users/${rKey}/referrals/count`).set(cnt + 1); 
+                            }); 
+                        } 
+                    }); 
+                }
                 
-                database.ref('users/' + p).set(newUser).then(() => { alert("Registered Successfully! 18 BDT Bonus Added. Please Login now."); toggleAuth('login'); });
+                database.ref('users/' + p).set(newUser).then(() => { 
+                    alert("Registered Successfully! 18 BDT Bonus Added. Please Login now."); 
+                    toggleAuth('login'); 
+                });
             });
         }
     }
@@ -1228,11 +1275,15 @@
                     let st = String(t.status).toLowerCase();
                     if(t.type === 'Deposit' && (st === 'accepted' || st === 'complete' || st === 'success') && !t.wagerAdded) {
                         user.wager_left = (parseFloat(user.wager_left) || 0) + parseFloat(t.amount);
-                        t.wagerAdded = true; updates[`users/${user.phone}/wager_left`] = user.wager_left; updates[`users/${user.phone}/transactions/${idx}/wagerAdded`] = true; needsUpdate = true;
+                        t.wagerAdded = true; 
+                        updates[`users/${user.phone}/wager_left`] = user.wager_left; 
+                        updates[`users/${user.phone}/transactions/${idx}/wagerAdded`] = true; 
+                        needsUpdate = true;
                     }
                 });
                 if(needsUpdate) database.ref().update(updates);
-                checkCommissionTransfer(); updateUI();
+                checkCommissionTransfer(); 
+                updateUI();
             }
         });
     }
@@ -1310,7 +1361,7 @@
         const seeds =['Felix', 'Aneka', 'Jocelyn', 'Robert', 'Luna', 'Midnight', 'Bandit', 'Oscar', 'Milo'];
         seeds.forEach(s => {
             const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${s}`;
-            grid.innerHTML += `<img onclick="saveAvatar('${url}')" src="${url}" class="w-20 h-20 rounded-full border-[3px] border-gray-100 hover:border-[#D4AF37] cursor-pointer transition-all hover:scale-105 mx-auto bg-gray-50 shadow-sm">`;
+            grid.innerHTML += `<img onclick="saveAvatar('${url}')" src="${url}" class="w-20 h-20 rounded-full border-[3px] border-gray-100 hover:border-[#D4AF37] cursor-pointer transition-all hover:scale-105 mx-auto bg-gray-50 shadow-sm" alt="Avatar option">`;
         });
         document.getElementById('avatarModal').classList.remove('hidden-el');
     }
@@ -1483,7 +1534,7 @@
         // System aggregate update for game logic
         database.ref(`live_bets/${currentMarket}/${activePeriod}/${currentBet.type}`).transaction(v => (parseFloat(v)||0)+amt); 
 
-        // NEW: Detailed live bet record push for Admin Tracking
+        // Detailed live bet record push for Admin Tracking
         database.ref(`admin_live_bets/${currentMarket}/${activePeriod}`).push({
             phone: user.phone,
             uid: user.uid,
@@ -1645,7 +1696,7 @@
         el.className = 'win-item-anim bg-white border-b border-gray-50 p-3 flex items-center justify-between shadow-sm'; 
         el.innerHTML = `
             <div class="flex items-center gap-4 w-full">
-                <img src="${avatar}" class="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100">
+                <img src="${avatar}" class="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100" alt="Avatar">
                 <div class="flex flex-col justify-center flex-1 space-y-1">
                     <div class="flex justify-between items-center w-full">
                         <span class="text-[13px] text-gray-500 font-medium">User</span>
@@ -1687,7 +1738,7 @@
             <!-- Rank 2 -->
             <div class="flex flex-col items-center w-[30%] relative">
                 <div class="absolute -top-7 text-3xl opacity-90 drop-shadow-md text-gray-300"><i class="fas fa-crown"></i></div>
-                <img src="${users[1].avatar}" class="w-16 h-16 rounded-full border-[3px] border-[#b0c4de] z-10 bg-white object-cover shadow">
+                <img src="${users[1].avatar}" class="w-16 h-16 rounded-full border-[3px] border-[#b0c4de] z-10 bg-white object-cover shadow" alt="User 2">
                 <div class="bg-gradient-to-b from-[#c5d5e6] to-[#9eb5ce] w-full pt-6 pb-2 rounded-t-xl -mt-4 text-center text-white shadow-md border-x border-t border-white/40">
                     <div class="bg-white/40 rounded-full text-[10px] font-black w-3/4 mx-auto mb-1 text-blue-900 shadow-sm">NO2</div>
                     <div class="text-[10px] font-bold truncate px-1 text-gray-800">${users[1].name}</div>
@@ -1697,7 +1748,7 @@
             <!-- Rank 1 -->
             <div class="flex flex-col items-center w-[36%] relative z-20">
                 <div class="absolute -top-9 text-5xl text-[#FFDF00] drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)] animate-pulse"><i class="fas fa-crown"></i></div>
-                <img src="${users[0].avatar}" class="w-20 h-20 rounded-full border-4 border-[#FFDF00] z-10 bg-white shadow-lg object-cover">
+                <img src="${users[0].avatar}" class="w-20 h-20 rounded-full border-4 border-[#FFDF00] z-10 bg-white shadow-lg object-cover" alt="User 1">
                 <div class="bg-gradient-to-b from-[#ff758c] to-[#ff7eb3] w-full pt-8 pb-3 rounded-t-[1.25rem] -mt-6 text-center text-white shadow-xl border-x border-t border-white/40">
                     <div class="bg-[#FFDF00] rounded-full text-[11px] font-black w-2/3 mx-auto mb-1 text-yellow-900 shadow-md">NO1</div>
                     <div class="text-[12px] font-bold truncate px-1 text-white">${users[0].name}</div>
@@ -1707,7 +1758,7 @@
             <!-- Rank 3 -->
             <div class="flex flex-col items-center w-[30%] relative">
                 <div class="absolute -top-7 text-3xl opacity-90 drop-shadow-md text-amber-600"><i class="fas fa-crown"></i></div>
-                <img src="${users[2].avatar}" class="w-16 h-16 rounded-full border-[3px] border-[#cd7f32] z-10 bg-white object-cover shadow">
+                <img src="${users[2].avatar}" class="w-16 h-16 rounded-full border-[3px] border-[#cd7f32] z-10 bg-white object-cover shadow" alt="User 3">
                 <div class="bg-gradient-to-b from-[#f6d365] to-[#fda085] w-full pt-6 pb-2 rounded-t-xl -mt-4 text-center text-white shadow-md border-x border-t border-white/40">
                     <div class="bg-white/40 rounded-full text-[10px] font-black w-3/4 mx-auto mb-1 text-amber-900 shadow-sm">NO3</div>
                     <div class="text-[10px] font-bold truncate px-1 text-gray-800">${users[2].name}</div>
@@ -1723,7 +1774,7 @@
             <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:bg-gray-50 hover:shadow-md transition">
                 <div class="flex items-center gap-3">
                     <span class="text-gray-400 font-black text-lg w-6 text-center drop-shadow-sm">${i+1}</span>
-                    <img src="${users[i].avatar}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100">
+                    <img src="${users[i].avatar}" class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100" alt="Avatar">
                     <span class="text-[13px] font-bold text-gray-700">${users[i].name}</span>
                 </div>
                 <div class="bg-gradient-to-r from-[#4ade80] to-[#16a34a] text-white px-3 py-1.5 rounded-full text-[12px] font-black shadow-sm">
@@ -1777,12 +1828,13 @@
         Object.values(allUsersDataCache).forEach(u => { if(lv2Uids.includes(String(u.referrer))) lv3.push(u); });
 
         let allTeam =[...lv1, ...lv2, ...lv3];
-        let dirReg = lv1.length, dirDepNum = 0, dirDepAmt = 0, dirBetAmt = 0; let teamReg = allTeam.length, teamDepNum = 0, teamDepAmt = 0, teamBetAmt = 0;
+        let dirReg = lv1.length, dirDepNum = 0, dirDepAmt = 0; 
+        let teamReg = allTeam.length, teamDepNum = 0, teamDepAmt = 0;
 
         lv1.forEach(u => {
             let hasDeposited = false;
             if(u.transactions) { 
-                let txs = Array.isArray(u.transactions) ? u.transactions : Object.values(u.transactions); 
+                let txs = Array.isArray(u.transactions) ? user.transactions : Object.values(u.transactions); 
                 txs.forEach(t => { 
                     if(t.type === 'Deposit' &&['accepted','complete','success'].includes(String(t.status).toLowerCase())) {
                         dirDepAmt += parseFloat(t.amount); 
@@ -2001,7 +2053,6 @@
         document.getElementById('gtAdminPhone').innerText = getLiveNumber(method); 
         document.getElementById('depTrx').value = ""; 
         
-        // Set current local time dynamically
         const now = new Date();
         document.getElementById('gtCurrentTime').innerText = now.toLocaleString('en-US');
         
@@ -2059,7 +2110,6 @@
 
     function openGiftModal() { switchTab('gift'); }
     
-    // UPDATED GIFT CODE REDEEM LOGIC (Supports max limit)
     function redeemGift() { 
         const code = document.getElementById('giftInputCode').value.trim(); if(!code) return; 
         database.ref('gift_codes/' + code).once('value', s => { 
@@ -2121,7 +2171,6 @@
         if(html === '') html = '<div class="text-center text-gray-400 text-xs mt-10 font-bold uppercase tracking-wider">No gifts claimed.</div>'; list.innerHTML = html; 
     }
 
-    // NEW CUSTOMER SERVICE CHAT LOGIC
     let chatListenerRef = null;
     function openCsChat() {
         if(!user) return alert("Please login first to chat with support!");
@@ -2138,7 +2187,7 @@
                     const isMe = m.sender === 'user';
                     const time = new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     let contentHtml = m.type === 'image' 
-                        ? `<img src="${m.content}" class="max-w-[200px] rounded-lg cursor-pointer border border-black/10 shadow-sm" onclick="window.open('${m.content}')">` 
+                        ? `<img src="${m.content}" class="max-w-[200px] rounded-lg cursor-pointer border border-black/10 shadow-sm" onclick="window.open('${m.content}')" alt="Attachment">` 
                         : `<p class="text-[13px] font-bold whitespace-pre-wrap">${m.content}</p>`;
 
                     if(isMe) {
@@ -2182,7 +2231,7 @@
     async function sendCsImage(input) {
         if(!input.files || input.files.length === 0) return;
         const file = input.files[0];
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
         if(file.size > maxSize) return alert("Image too large! Maximum 5MB.");
         
         pushCsMessage('text', '[Uploading image...]');
@@ -2274,7 +2323,7 @@
             e.preventDefault();
             return false;
         }
-        openCsChat(); // Changed from opening Telegram
+        openCsChat();
     });
 
 </script>
